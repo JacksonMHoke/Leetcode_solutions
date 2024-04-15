@@ -12,14 +12,10 @@
  */
 class Solution {
 public:
-    int sumNumbers(TreeNode* root) {
-        return recursion(root, 0);
-    }
-    
-    int recursion (TreeNode* root, int sum) {
+    int sumNumbers(TreeNode* root, int sum=0) {
         if (!root) return 0;
         sum=sum*10+root->val;
         if (!root->right && !root->left) return sum;
-        return recursion(root->left, sum)+recursion(root->right, sum);
+        return sumNumbers(root->left, sum)+sumNumbers(root->right, sum);
     }
 };
