@@ -4,7 +4,7 @@ public:
     int pairsLT(vector<int>& nums, int guess) {
         int start=0, end=0, n=nums.size(), lt=0;
         while (end<n) {
-            while (start<=end && nums[end]- nums[start]>guess)
+            while (start<=end && nums[end]-nums[start]>guess)
                 start++;
             lt+=end-start;
             end++;            
