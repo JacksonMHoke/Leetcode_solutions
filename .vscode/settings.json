@@ -9,6 +9,8 @@
         "vector": "cpp",
         "xutility": "cpp",
         "algorithm": "cpp",
-        "limits": "cpp"
+        "limits": "cpp",
+        "ios": "cpp",
+        "xiosbase": "cpp"
     }
 }
