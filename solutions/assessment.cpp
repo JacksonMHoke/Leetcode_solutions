@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <queue>
+#include <memory>
 
 using namespace std;
 
@@ -18,131 +19,138 @@ using namespace std;
  
 class Location {
 public:
-    Location(int _x, int _y) {
-        x=_x;
-        y=_y;
-    };
+    Location(int _x, int _y) : x(_x), y(_y), explored(false) {}
+
+    virtual ~Location() = default;
+
+    pair<int, int> getLocation() {
+        return {x, y};
+    }
+
+    bool isExplored() {
+        return explored; 
+    }
+
+    void explore() {
+        explored = true;
+    }
+
+    virtual bool isExit() {
+        return false;
+    }
+
+    virtual bool isWalkable()=0;
+private:
     int x;
     int y;
-
-    virtual ~Location() {}
+    bool explored;
 };
 
 class Wall : public Location {
 public:
     Wall(int _x, int _y) : Location(_x, _y) {}
+
+    bool isWalkable() override {
+        return false;
+    }
 };
 
 class Exit : public Location {
 public:
     Exit(int _x, int _y) : Location(_x, _y) {}
+
+    bool isWalkable() override {
+        return true;
+    }
+
+    bool isExit() override {
+        return true;
+    }
 };
 
-class Explored : public Location {
+class EmptyLocation : public Location {
 public:
-    Explored(int _x, int _y) : Location(_x, _y) {}
-};
+    EmptyLocation(int _x, int _y) : Location(_x, _y) {}
 
-class Adventurer {
-public:
-    int x;
-    int y;
-    Adventurer(int _x, int _y) {
-        x=_x;
-        y=_y;
-    }
-    
-    int interact(Location* loc) {
-        if (typeid(*loc) == typeid(Wall) || typeid(*loc) == typeid(Explored))
-            return -1;
-        if (typeid(*loc) == typeid(Exit))
-            return 1;
-        return 0;
-    }
-    
-    void move(int _x, int _y) {
-        x=_x;
-        y=_y;
+    bool isWalkable() override {
+        return true;
     }
 };
 
 class Castle {
 public:
-    vector<vector<Location*>> grid;
-    int rows;
-    int cols;
-    Castle(int _rows, int _cols) {
-        rows=_rows;
-        cols=_cols;
-        grid=vector<vector<Location*>>(rows, vector<Location*>(cols));
-        
-        for (int i=0; i<rows; ++i) {
-            for (int j=0; j<cols; ++j) {
-                grid[i][j] = new Location(i, j);
+    Castle(int _rows, int _cols) : rows(_rows), cols(_cols) {
+        for (int i = 0; i < rows; ++i) {
+            grid.push_back(vector<unique_ptr<Location>>());
+            for (int j = 0; j < cols; ++j) {
+                grid[i].push_back(make_unique<EmptyLocation>(i, j));
             }
         }
     }
-    
-    void set(int _x, int _y, Location* to) {
-        if (_x < 0 || _x >= rows || _y < 0 || _y >= cols)
+
+    Location* get(int _i, int _j) {
+        return grid[_i][_j].get();
+    }
+
+    void placeWall(int _i, int _j) {
+        if (_i<0 || _i>=rows || _j<0 || _j>=cols)
             return;
-        delete grid[_x][_y];
-        grid[_x][_y] = to;
+        grid[_i][_j] = make_unique<Wall>(_i, _j);
     }
-    
-    Location* get(int _x, int _y) {
-        if (_x < 0 || _x >= rows || _y < 0 || _y >= cols)
-            return nullptr;
-        return grid[_x][_y];
+
+    void placeExit(int _i, int _j) {
+        if (_i<0 || _i>=rows || _j<0 || _j>=cols)
+            return;
+        grid[_i][_j] = make_unique<Exit>(_i, _j);
     }
+
+private:
+    int rows;
+    int cols;
+    vector<vector<unique_ptr<Location>>> grid;
 };
 
-vector<int> escape_castle(int rows, int columns, vector<vector<int>> walls, vector<int> escape_point) {
-    if (escape_point[0] == 0 && escape_point[1] == 0)
-        return {0};
-    Castle castle = Castle(rows, columns);
-    
+int escape_castle(int rows, int columns, vector<vector<int>> walls, vector<int> escape_point) {
+    Castle castle(rows, columns);
     for (auto& wall : walls)
-        castle.set(wall[0], wall[1], new Wall(wall[0], wall[1]));
-    castle.set(escape_point[0], escape_point[1], new Exit(escape_point[0], escape_point[1]));
-    Adventurer adventurer = Adventurer(0, 0);
-    
-    vector<int> dirs{0, 1, 0, -1, 0};
-    queue<Location*> bfs;
-    bfs.push(castle.get(0, 0));
+        castle.placeWall(wall[0], wall[1]);
+    castle.placeExit(escape_point[0], escape_point[1]);
+
+    vector<vector<int>> dirs{{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+    queue<pair<int, int>> bfs;
+    bfs.push({0, 0});
     int dist = 0;
     while (!bfs.empty()) {
         int sz = bfs.size();
-        for (int i=0; i<sz; ++i) {
-            Location* curr = bfs.front();
+        for (int i = 0; i < sz; ++i) {
+            auto [x, y] = bfs.front();
             bfs.pop();
-            
-            for (int j=0; j<dirs.size()-1; ++j) {
-                if (curr->x + dirs[j] < 0 || curr->x + dirs[j] >= rows || curr->y + dirs[j + 1] < 0 || curr->y + dirs[j + 1] >= columns)
+
+            for (auto& dir : dirs) {
+                int nx = x + dir[0];
+                int ny = y + dir[1];
+
+                if (nx < 0 || nx >= rows || ny < 0 || ny >= columns)
                     continue;
-                Location* interactWith = castle.get(curr->x + dirs[j], curr->y + dirs[j + 1]);
-                int interaction = adventurer.interact(interactWith);
-                cout << interaction << " " << curr->x + dirs[j] << " " << curr->y + dirs[j + 1] << endl;
-                if (interaction == 1)
-                    return {dist+1};
-                if (interaction == 0) {
-                    castle.set(curr->x + dirs[j], curr->y + dirs[j + 1], new Explored(curr->x + dirs[j], curr->y + dirs[j + 1]));
-                    bfs.push(castle.get(curr->x + dirs[j], curr->y + dirs[j + 1]));
+                
+                Location* next = castle.get(nx, ny);
+                if (next->isExit())
+                    return dist+1;
+                else if (next->isWalkable() && !next->isExplored()) {
+                    bfs.push({nx, ny});
+                    next->explore();
                 }
             }
         }
-        
         dist++;
     }
-    
-    return {-1};
+
+    return 0;
 }
 
 int main () {
-    int rows=2, cols=2;
-    vector<vector<int>> walls;
-    vector<int> escape_point{1, 1};
-    Location* wall = new Wall(1, 2);
-    // cout << (typeid((*wall))==typeid(Wall)) << endl;
-    cout << escape_castle(rows, cols, walls, escape_point)[0] << endl;
+    int rows=3, cols=5;
+    vector<vector<int>> walls{{0, 1}, {1, 1}, {1, 3}, {2, 3}};
+    vector<int> escape_point{2, 4};
+    cout << escape_castle(rows, cols, walls, escape_point) << endl;
 }
