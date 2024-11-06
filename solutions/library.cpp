@@ -97,11 +97,33 @@ private:
 
 class Book {
 public:
-    Book(string _name, int _id) {}
-    void borrowFromLibrary(int _returnDate);
-    bool returnToLibrary();
-    const BookStatus getStatus(int _date);
-    string getName() const;
+    Book(string _name, int _id) {
+        m_name = _name;
+        m_id = _id;
+        m_returnDate = -1;
+        m_status = BookStatus::AVAILABLE;
+    }
+
+    void borrowFromLibrary(int _returnDate) {
+        m_returnDate = _returnDate;
+        m_status = BookStatus::BORROWED;
+    }
+
+    bool returnToLibrary() {
+        m_returnDate = -1;
+        m_status = BookStatus::AVAILABLE;
+    }
+
+    BookStatus getStatus(int _date) {
+        if (_date > m_returnDate)
+            m_status = BookStatus::OVERDUE;
+        return m_status;   
+    }
+
+    string getName() const { return m_name; }
+    int getId() const { return m_id; }
+    int getReturnDate() const { return m_returnDate; }
+
 private:
     string m_name;
     BookStatus m_status;
@@ -111,12 +133,28 @@ private:
 
 class User {
 public:
-    User(string _name, int _id) {}
-    void borrowBook(Book* _book);
-    void returnBook(string _name);
-    string getName() const;
-    int getId() const;
-    vector<Book*> getBooks() const;
+    User(string _name, int _id) {
+        m_name = _name;
+        m_id = _id;
+    }
+
+    void borrowBook(Book* _book) {
+        m_books.push_back(_book);
+    }
+
+    void returnBook(string _name) {
+        for (int i = 0; i < m_books.size(); ++i) {
+            if (m_books[i]->getName() == _name) {
+                m_books[i]->returnToLibrary();
+                m_books.erase(m_books.begin()+i);
+                return;
+            }
+        }
+    }
+
+    string getName() const { return m_name; }
+    int getId() const { return m_id; }
+    vector<Book*> getBooks() const { return m_books; }
 private:
     string m_name;
     int m_id;
