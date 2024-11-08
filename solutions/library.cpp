@@ -206,12 +206,12 @@ int main() {
     lib.returnBook("Harry Potter", u1);
 
     cout << "AVAILABLE BOOKS: " << endl;
-    available = lib.availableBooks(0);
+    available = lib.availableBooks(11);
     for (Book* book : available)
         cout << book->getName() << endl;
 
     cout << "BORROWED BOOKS: " << endl;
-    borrowed = lib.borrowedBooks(0);
+    borrowed = lib.borrowedBooks(11);
     for (Book* book : borrowed)
         cout << book->getName() << endl;
 
