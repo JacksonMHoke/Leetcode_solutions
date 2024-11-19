@@ -71,10 +71,16 @@ public:
     User(string _name, int _id) {
         m_name = _name;
         m_id = _id;
+        m_borrowLimit=0;
     }
 
-    void borrowBook(Book* _book) {
+    bool borrowBook(Book* _book) {
+        if (m_books.size() >= m_borrowLimit) {
+            cout << "PAST BORROW LIMIT" << endl;
+            return false;
+        }
         m_books.push_back(_book);
+        return true;
     }
 
     void returnBook(string _name) {
@@ -90,11 +96,25 @@ public:
     string getName() const { return m_name; }
     int getId() const { return m_id; }
     vector<Book*> getBooks() const { return m_books; }
-private:
+protected:
     string m_name;
     int m_id;
     int m_borrowLimit;
     vector<Book*> m_books;
+};
+
+class Student : public User {
+public:
+    Student(string _name, int _id) : User(_name, _id) {
+        m_borrowLimit = 1;
+    }
+};
+
+class Professor : public User {
+public:
+    Professor(string _name, int _id) : User(_name, _id) {
+        m_borrowLimit = 2;
+    }
 };
 
 struct BookCmp {
@@ -151,12 +171,13 @@ public:
 
         for (auto i = range.first; i != range.second; ++i) {
             if ((*i)->getStatus(_date)==BookStatus::AVAILABLE) {
-                (*i)->borrowFromLibrary(_date + m_returnInterval);
-                _user->borrowBook(*i);
-                return true;
+                if (_user->borrowBook(*i)) {
+                    (*i)->borrowFromLibrary(_date + m_returnInterval);
+                    return true;
+                }
+                return false;
             }
         }
-
         return false;
     }
 
@@ -175,8 +196,8 @@ int main() {
     Library lib(10);
     lib.addBook("Harry Potter");
     lib.addBook("Lord of the Rings");
-    User* u1 = new User("Jackson", 0);
-    User* u2 = new User("Dev", 1);
+    User* u1 = new Student("Jackson", 0);
+    User* u2 = new Professor("Dev", 1);
 
     cout << "AVAILABLE BOOKS: " << endl;
     vector<Book*> available = lib.availableBooks(0);
@@ -184,7 +205,8 @@ int main() {
         cout << book->getName() << endl;
 
     cout << "BORROWING HARRY POTTER" << endl;
-    lib.borrowBook("Harry Potter", u1, 0);
+    lib.borrowBook("Harry Potter", u2, 0);
+    lib.borrowBook("Lord of the Rings", u2, 0);
 
     cout << "AVAILABLE BOOKS: " << endl;
     available = lib.availableBooks(0);
@@ -203,7 +225,7 @@ int main() {
         cout << book->getName() << endl;
 
     cout << "RETURN HARRY POTTER" << endl;
-    lib.returnBook("Harry Potter", u1);
+    lib.returnBook("Harry Potter", u2);
 
     cout << "AVAILABLE BOOKS: " << endl;
     available = lib.availableBooks(11);
