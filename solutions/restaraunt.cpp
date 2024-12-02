@@ -103,19 +103,36 @@ private:
 
 class MenuItem {
 public:
-
+    MenuItem(int _id, string _name, int _cost, bool _dairy, bool _nuts) : 
+        id(_id),
+        name(_name),
+        cost(_cost),
+        dairy(_dairy),
+        nuts(_nuts)
+    {}
+    int getCost() { return cost; }
+    string getName() { return name; }
+    int getId() { return id; }
+    bool hasDairy() { return dairy; }
+    bool hasNuts() { return nuts; }
 private:
     int id;
     string name;
     int cost;
 
-    bool hasDairy;
-    bool hasNuts;
+    bool dairy;
+    bool nuts;
 };
 
 class Food : MenuItem {
 public:
-
+    Food(int _id, string _name, int _cost, bool _dairy, bool _nuts, bool _vegetarian, bool _vegan) :
+        MenuItem(_id, _name, _cost, _dairy, _nuts),
+        vegetarian(_vegetarian),
+        vegan(_vegan)
+    {}
+    bool isVegetarian() { return vegetarian; }
+    bool isVegan() { return vegan; }
 private:
     bool vegetarian;
     bool vegan;
@@ -123,16 +140,34 @@ private:
 
 class Drink : MenuItem {
 public:
-
+    Drink(int _id, string _name, int _cost, bool _dairy, bool _nuts, bool _alchohol) :
+        MenuItem(_id, _name, _cost, _dairy, _nuts),
+        alchohol(_alchohol)
+    {}
 private:
-    bool hasAlchohol;
+    bool alchohol;
 };
 
 class Order {
 public:
+    Order(int _timeOfOrder) :
+        timeOfOrder(_timeOfOrder)
+    {}
+    void addItem(MenuItem* itemToAdd) {
+        itemsToCook.push_back(itemToAdd);
+    }
+    void serve(MenuItem* itemToServe) {
+        
+    }
+    int costOfOrder() {
 
+    }
 private:
     vector<MenuItem*> itemsToCook;
     vector<MenuItem*> itemsReceived;
     int timeOfOrder;
 };
+
+int main() {
+
+}
