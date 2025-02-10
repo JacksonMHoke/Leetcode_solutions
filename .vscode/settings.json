@@ -11,6 +11,14 @@
         "algorithm": "cpp",
         "limits": "cpp",
         "ios": "cpp",
-        "xiosbase": "cpp"
+        "xiosbase": "cpp",
+        "utility": "cpp",
+        "ostream": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "iostream": "cpp",
+        "xhash": "cpp",
+        "xtree": "cpp",
+        "queue": "cpp"
     }
 }
