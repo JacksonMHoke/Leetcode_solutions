@@ -2,13 +2,20 @@
 class Solution {
     public:
         int stoneGameVIII(vector<int>& stones) {
-            return 0;
+            vector<int> dp(stones.size(), INT_MIN);
+            for (int i=1; i<stones.size(); ++i)
+                stones[i]+=stones[i-1];
+    
+            if (stones.size()==2)
+                return stones.back();
+    
+            dp[stones.size()-2]=stones.back();
+            dp.back()=0;
+            for (int i=(int)stones.size()-3; i>=0; --i) {
+                dp[i]=max(dp[i+1], stones[i+1]-dp[i+1]);
+            }
+    
+            return dp[0];
         }
     };
     
-    //19 1 -100 -10 1 5
-    
-    //if game ends with alice, then the difference is the sum of stones that alice picked
-    //if game ends with bob, then the difference is the negative sum of stones that bob picked
-    
-    //max score is either sum of all positive digits or negative sum of all negative digits
