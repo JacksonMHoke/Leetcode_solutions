@@ -3,6 +3,11 @@
 // Now understand where KMP array fails
 // We miss the bits that arent necessarily matching up till the border, but are a suffix that matches the prefix
 // We need to find a new prev array that points back to those correctly or accounts for them
+// Got spoiled that Z-score is a sliding window approach. Keep that in mind for next time I am working on this problem.
+// Had to cheat a bit to come to the solution, but got fairly close.
+// Idea is to try and expand as far right as you can first, and then iterate the left pointer and use the previous lookups at i-L to find out how many matches
+// the current i will have. If the number of matches it will have matches all the way to the border, try and expand out as far as possible.
+// This way we can find the prefix matches at each suffix in amortized O(1)
 class Solution {
     public:
         long long sumScores(string s) {
