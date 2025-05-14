@@ -16,25 +16,23 @@ class Solution {
             int l=0, r=0, n=s.length();
             for (int i=1; i<s.length(); ++i) {
                 if (i>=r) {
-                    l=r=i;
-                    while (r<n && s[r]==s[r-l])
+                    l=i;
+                    r=i-1;
+                    while (r<n-1 && s[r+1]==s[r-l+1])
                         r++;
-                    cout << l << " || " << r << endl;
-                    dp[i]=r-l;
+                    dp[i]=r-l+1;
                 } else {
                     if (dp[i-l]>=r-l+1) {
                         l=i;
-                        while (r<n && s[r]==s[r-l])
+                        while (r<n-1 && s[r+1]==s[r-i+1])
                             r++;
+                        dp[i]=r-l+1;
+                    } else {
+                        dp[i]=min(r-l+1, dp[i-l]);
                     }
-                    cout << l << " " << r << endl;
-                    dp[i]=min(r-l+1, dp[i-l]);
                 }
             }
     
-            for (auto num : dp)
-                cout << num << " ";
-    
-            return accumulate(begin(dp), end(dp), 0ll);
+            return accumulate(begin(dp), end(dp), 0ll)+s.length();
         }
     };
