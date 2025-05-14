@@ -12,24 +12,29 @@ class Solution {
     public:
         long long sumScores(string s) {
             long long rt=0;
-            vector<int> dp(s.length(), -1);
-            int curr=-1;
+            vector<int> dp(s.length());
+            int l=0, r=0, n=s.length();
             for (int i=1; i<s.length(); ++i) {
-                while (curr>=0 && s[curr+1]!=s[i]) {
-                    cout << "FALLING BACK TO " << dp[curr] << endl;
-                    curr=dp[curr];
+                if (i>=r) {
+                    l=r=i;
+                    while (r<n && s[r]==s[r-l])
+                        r++;
+                    cout << l << " || " << r << endl;
+                    dp[i]=r-l;
+                } else {
+                    if (dp[i-l]>=r-l+1) {
+                        l=i;
+                        while (r<n && s[r]==s[r-l])
+                            r++;
+                    }
+                    cout << l << " " << r << endl;
+                    dp[i]=min(r-l+1, dp[i-l]);
                 }
-                if (s[i]==s[curr+1])
-                    curr++;
-                dp[i]=curr;
             }
-            while (curr>=0) {
-                cout << "FALLING BACK TO " << dp[curr] << endl;
-                rt+=curr+1;
-                curr=dp[curr];
-            }
-            for (int i=0; i<dp.size(); ++i)
-                cout << dp[i] << " ";
-            return rt+s.length();
+    
+            for (auto num : dp)
+                cout << num << " ";
+    
+            return accumulate(begin(dp), end(dp), 0ll);
         }
     };
