@@ -10,7 +10,15 @@
 // choose the elements on the left side of the array. If other other side doesn't have a b, we have to multiply the number of ways we can pick the right elements times
 // the number of ways we can pick the left side with at least 1 b in it.
 // We also have to consider the fact that if we only pick 2 b's we cannot pick a duplicate number, if we ever pick 3 b's it won't matter.
-// 
+// So maybe we should precompute the number of ways we can choose the left and right elements assuming we have 2 b's. Then we can precompute the case for when we have 3 or more b's
+// because that should be fairly simple
+// baccaabbxz
+// X=# of unique elements on right that is not middle number and number picked on left
+// for mode being 2 characters freq: (#c's on left)*(#b's on left)*(X)*(X-1)/2+mirrored version of this
+// for mode being 3 characters freq: (#c's on left)*(#c's on left-1)/2*X*X/2+mirrored version of this+(#c's on left)*(#non c's on left)*(#c's on right)*(#non c's on right)
+// for mode being 4 characters freq: (#c's on left)*(#c's on left-1)/2*(#c's on right)*(X)+mirrored version of this
+// for mode being 5 characters freq: (#c's on left)*(#c's on left-1)/2*(#c's on right)*(#c's on right-1)/2
+
 class Solution {
     public:
         int subsequencesWithMiddleMode(vector<int>& nums) {
